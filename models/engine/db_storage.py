@@ -3,8 +3,9 @@
 Class that defines DBStorage class.
 """
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, scoped_session
-from models.base_model import Base
+from sqlalchemy.orm import sessionmaker, scoped_session, Session
+from models.base_model import Base, BaseModel
+from os import getenv
 
 
 class DBStorage:
@@ -14,15 +15,19 @@ class DBStorage:
     # class constructor that initializes the db variables
     def __init__(self):
         # Create the DB engine
+        username = getenv('HBNB_MYSQL_USER')
+        password = getenv('HBNB_MYSQL_PWD')
+        host = getenv('HBNB_MYSQL_HOST')
+        db_name = getenv('HBNB_MYSQL_DB')
         self.__engine = create_engine('mysql+mysqldb://{}:{}@{}:3306/{}'
-                                      .format(os.getenv('HBNB_MYSQL_USER'),
-                                              os.getenv('HBNB_MYSQL_PWD'),
-                                              os.getenv('HBNB_MYSQL_HOST'),
-                                              os.getenv('HBNB_MYSQL_DB')),
+                                      .format(username,
+                                              password,
+                                              host,
+                                              db_name),
                                       pool_pre_ping=True)
 
         # Drop all tables if in test environment
-        if os.getenv('HBNB_ENV') == 'test':
+        if getenv('HBNB_ENV') == 'test':
             Base.metadata.drop_all(self.__engine)
 
         # Create a session
@@ -63,6 +68,7 @@ class DBStorage:
             obj: Object to be added into the db.
         """
         self.__session.add(obj)
+        self.__session.commit()
 
     def save(self):
         """
