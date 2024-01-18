@@ -3,8 +3,9 @@
 Class that defines DBStorage class.
 """
 from sqlalchemy import create_engine
+from sqlalchemy.dialects.mysql import pymysql
 from sqlalchemy.orm import sessionmaker, scoped_session, Session
-from models.base_model import Base, BaseModel
+from models.base_model import BaseModel, Base
 from os import getenv
 
 
@@ -19,12 +20,11 @@ class DBStorage:
         password = getenv('HBNB_MYSQL_PWD')
         host = getenv('HBNB_MYSQL_HOST')
         db_name = getenv('HBNB_MYSQL_DB')
-        self.__engine = create_engine('mysql+mysqldb://{}:{}@{}:3306/{}'
-                                      .format(username,
-                                              password,
-                                              host,
-                                              db_name),
-                                      pool_pre_ping=True)
+        db_url = 'mysql+mysqldb://{}:{}@{}/{}?charset=utf8'.format(username,
+                                                           password,
+                                                           host,
+                                                           db_name)
+        self.__engine = create_engine(db_url, pool_pre_ping=True)
 
         # Drop all tables if in test environment
         if getenv('HBNB_ENV') == 'test':
