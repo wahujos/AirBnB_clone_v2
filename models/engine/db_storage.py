@@ -14,16 +14,16 @@ class DBStorage:
     __session = None
 
     # class constructor that initializes the db variables
-    def __init__(self):
+    def __init__(self) -> None:
         # Create the DB engine
         username = getenv('HBNB_MYSQL_USER')
         password = getenv('HBNB_MYSQL_PWD')
         host = getenv('HBNB_MYSQL_HOST')
         db_name = getenv('HBNB_MYSQL_DB')
         db_url = 'mysql+mysqldb://{}:{}@{}/{}?charset=utf8'.format(username,
-                                                           password,
-                                                           host,
-                                                           db_name)
+                                                                   password,
+                                                                   host,
+                                                                   db_name)
         self.__engine = create_engine(db_url, pool_pre_ping=True)
 
         # Drop all tables if in test environment
@@ -31,9 +31,11 @@ class DBStorage:
             Base.metadata.drop_all(self.__engine)
 
         # Create a session
-        Session = scoped_session(sessionmaker(bind=self.__engine,
-                                              expire_on_commit=False))
-        self.__session = Session()
+        Base.metadata.create_all(self.__engine)
+        # Session = scoped_session(sessionmaker(bind=self.__engine)
+        # self.__session = Session()
+        self.__session = scoped_session(sessionmaker(bind=self.__engine,
+                                                     expire_on_commit=False))
 
     def all(self, cls=None):
         """
@@ -67,8 +69,9 @@ class DBStorage:
         Args:
             obj: Object to be added into the db.
         """
-        self.__session.add(obj)
-        self.__session.commit()
+        session = self.__session()
+        session.add(obj)
+        session.commit()
 
     def save(self):
         """
@@ -91,6 +94,7 @@ class DBStorage:
         Create all tables in the database and
         create the current database session from the engine.
         """
+        # Base.metadata.drop_all(self__engine)
         Base.metadata.create_all(self.__engine)
         self.__session = sessionmaker(bind=self.__engine,
                                       expire_on_commit=False)
