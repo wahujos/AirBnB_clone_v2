@@ -22,6 +22,7 @@ def c_text(text):
     formatted_string = text.replace("_", " ")
     return f"C {formatted_string}"
 
+
 @app.route("/python", strict_slashes=False)
 def python(text="is cool"):
     formatted_string = text.replace("_", " ")
